@@ -15,7 +15,12 @@ const INITIAL_DATA: GoldRow[] = [
   { id: 3, type: '18K', buy: '9.900.000', sell: '11.240.000' },
 ];
 
-export default function GoldTable() {
+type Props = {
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
+};
+
+export default function GoldTable({ isFullscreen, onToggleFullscreen }: Props) {
   const [data, setData] = useState<GoldRow[]>(INITIAL_DATA);
   const [editingCell, setEditingCell] = useState<{ id: number; field: 'buy' | 'sell' } | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -56,11 +61,11 @@ export default function GoldTable() {
     <div className="w-full flex-1 flex flex-col justify-center overflow-x-auto">
       <div className="min-w-[800px] w-full bg-white rounded-lg shadow-xl border-4 border-yellow-500 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-yellow-500 text-white font-bold text-4xl">
+          <thead className="bg-yellow-500 text-white font-bold text-2xl md:text-3xl">
             <tr>
-              <th className="py-4 px-4 w-[20%]">LOẠI VÀNG</th>
-              <th className="py-4 px-4 w-[40%]">MUA VÀO</th>
-              <th className="py-4 px-4 w-[40%]">BÁN RA</th>
+              <th className="py-3 px-4 w-[20%]">LOẠI VÀNG</th>
+              <th className="py-3 px-4 w-[40%]">MUA VÀO</th>
+              <th className="py-3 px-4 w-[40%]">BÁN RA</th>
             </tr>
           </thead>
           <tbody>
@@ -72,13 +77,13 @@ export default function GoldTable() {
                 }`}
               >
                 {/* Type Column */}
-                <td className="py-6 text-center text-6xl font-bold text-red-700">
+                <td className="py-4 text-center text-4xl md:text-5xl font-bold text-red-700">
                   {row.type}
                 </td>
 
                 {/* Buy Column */}
                 <td
-                  className="py-6 text-center text-7xl font-bold text-blue-900 cursor-pointer hover:bg-yellow-100 transition-colors relative"
+                  className="py-4 text-center text-5xl md:text-6xl font-bold text-blue-900 cursor-pointer hover:bg-yellow-100 transition-colors relative"
                   onClick={() => handleCellClick(row, 'buy')}
                 >
                   {editingCell?.id === row.id && editingCell.field === 'buy' ? (
@@ -89,7 +94,7 @@ export default function GoldTable() {
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
                       onBlur={handleConfirm}
-                      className="absolute inset-0 w-full h-full text-center text-7xl font-bold bg-white border-2 border-blue-500 outline-none text-red-600"
+                      className="absolute inset-0 w-full h-full text-center text-5xl md:text-6xl font-bold bg-white border-2 border-blue-500 outline-none text-red-600"
                     />
                   ) : (
                     row.buy
@@ -98,7 +103,7 @@ export default function GoldTable() {
 
                 {/* Sell Column */}
                 <td
-                  className="py-6 text-center text-7xl font-bold text-red-600 cursor-pointer hover:bg-yellow-100 transition-colors relative"
+                  className="py-4 text-center text-5xl md:text-6xl font-bold text-red-600 cursor-pointer hover:bg-yellow-100 transition-colors relative"
                   onClick={() => handleCellClick(row, 'sell')}
                 >
                   {editingCell?.id === row.id && editingCell.field === 'sell' ? (
@@ -109,7 +114,7 @@ export default function GoldTable() {
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
                       onBlur={handleConfirm}
-                      className="absolute inset-0 w-full h-full text-center text-7xl font-bold bg-white border-2 border-red-500 outline-none text-red-600"
+                      className="absolute inset-0 w-full h-full text-center text-5xl md:text-6xl font-bold bg-white border-2 border-red-500 outline-none text-red-600"
                     />
                   ) : (
                     row.sell
@@ -121,16 +126,25 @@ export default function GoldTable() {
         </table>
       </div>
 
-      {editingCell && (
-        <div className="mt-8 flex justify-center">
+      <div className="mt-6 flex justify-center gap-4">
+        {editingCell && (
           <button
             onClick={handleConfirm}
-            className="bg-green-600 text-white text-3xl font-bold py-3 px-10 rounded-xl hover:bg-green-700 shadow-lg active:scale-95 transition-transform"
+            className="bg-green-600 text-white text-2xl font-bold py-2 px-8 rounded-xl hover:bg-green-700 shadow-lg active:scale-95 transition-transform"
           >
             XÁC NHẬN CẬP NHẬT
           </button>
-        </div>
-      )}
+        )}
+        
+        {!isFullscreen && (
+          <button
+            onClick={onToggleFullscreen}
+            className="bg-blue-600 text-white text-2xl font-bold py-2 px-8 rounded-xl hover:bg-blue-700 shadow-lg active:scale-95 transition-transform"
+          >
+            PHÓNG TO MÀN HÌNH
+          </button>
+        )}
+      </div>
     </div>
   );
 }
