@@ -55,7 +55,7 @@ export default function Home() {
       {/* 2. Tiêu đề chính + 3. Tiêu đề phụ */}
       <div className="text-center mb-6 relative mt-4 md:mt-6">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-yellow-700 tracking-tight drop-shadow-sm mb-2 uppercase flex items-center gap-2 md:gap-4 justify-center whitespace-nowrap">
-          <span>💍</span> HIỆU VÀNG CHÁNH <span>✨</span>
+          <span>💍</span> DNTN HIỆU VÀNG CHÁNH <span>✨</span>
         </h1>
         <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-gray-700 uppercase bg-yellow-300 inline-block px-6 md:px-10 py-1 md:py-2 rounded-full shadow-md mt-2 md:mt-4">
           Giá vàng hôm nay
