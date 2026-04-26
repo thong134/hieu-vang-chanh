@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Settings } from 'lucide-react';
 import Clock from './components/Clock';
 import GoldTable from './components/GoldTable';
 
@@ -48,7 +50,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-yellow-50 to-white pt-6 px-4 flex flex-col items-center">
+    <main className="min-h-screen bg-gradient-to-br from-yellow-50 to-white pt-6 px-4 flex flex-col items-center relative">
       {/* 1. Đồng hồ thời gian thực */}
       <Clock />
 
@@ -66,6 +68,18 @@ export default function Home() {
       <div className="w-full max-w-[98%] lg:max-w-[90%] flex-1 flex flex-col mb-4">
          <GoldTable isFullscreen={isFullscreen} onToggleFullscreen={toggleFullscreen} />
       </div>
+
+      {/* Nút ẩn đi tới quản trị */}
+      {!isFullscreen && (
+        <Link 
+          href="/admin" 
+          className="fixed bottom-4 right-4 p-3 bg-white/50 hover:bg-white text-gray-400 hover:text-yellow-600 rounded-full shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm z-50 group"
+          title="Khu vực Quản trị"
+        >
+          <Settings className="w-6 h-6 group-hover:rotate-90 transition-transform duration-500" />
+        </Link>
+      )}
     </main>
   );
 }
+
