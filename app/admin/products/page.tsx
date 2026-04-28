@@ -75,7 +75,7 @@ export default function ProductsPage() {
             className="py-2.5 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 outline-none transition-all font-medium text-gray-700"
           >
             <option value="all">Tất cả trạng thái</option>
-            <option value="available">Chưa bán (Tồn kho)</option>
+            <option value="available">Tồn kho</option>
             <option value="sold">Đã bán</option>
           </select>
         </div>
@@ -90,7 +90,7 @@ export default function ProductsPage() {
                 <th className="px-6 py-4 font-semibold">Mã Vạch</th>
                 <th className="px-6 py-4 font-semibold">Tên Sản Phẩm</th>
                 <th className="px-6 py-4 font-semibold">HLV</th>
-                <th className="px-6 py-4 font-semibold">KLV (Khối lượng vàng)</th>
+                <th className="px-6 py-4 font-semibold">KLV (Chỉ)</th>
                 <th className="px-6 py-4 font-semibold">Công</th>
                 <th className="px-6 py-4 font-semibold">Trạng Thái</th>
                 <th className="px-6 py-4 font-semibold text-right">Thao tác</th>
@@ -115,7 +115,7 @@ export default function ProductsPage() {
                   let formattedLabor = '---';
                   const laborNum = Number(String(p.laborCost).replace(/,/g, ''));
                   if (!isNaN(laborNum) && laborNum > 0) {
-                      formattedLabor = (laborNum * 1000).toLocaleString('vi-VN') + ' VNĐ';
+                      formattedLabor = (laborNum * 1000).toLocaleString('vi-VN') + 'đ';
                   }
 
                   return (
@@ -134,7 +134,7 @@ export default function ProductsPage() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Tồn kho
+                            Kho
                           </span>
                         )}
                       </td>

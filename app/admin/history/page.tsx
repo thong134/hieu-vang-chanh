@@ -103,11 +103,11 @@ export default function TransactionsHistoryPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
          <div className="p-6 rounded-2xl border-2 border-green-200 bg-green-50/50 flex flex-col justify-center">
             <p className="text-green-700 font-bold mb-1 uppercase text-sm tracking-widest">Tổng Thu Vàng Bán Ra</p>
-            <p className="text-3xl font-black text-green-700">{calculateTotalSell().toLocaleString('vi-VN')} VNĐ</p>
+            <p className="text-3xl font-black text-green-700">{calculateTotalSell().toLocaleString('vi-VN')} đ</p>
          </div>
          <div className="p-6 rounded-2xl border-2 border-blue-200 bg-blue-50/50 flex flex-col justify-center">
             <p className="text-blue-700 font-bold mb-1 uppercase text-sm tracking-widest">Tổng Chi Tiền Thu Mua Cũ</p>
-            <p className="text-3xl font-black text-blue-700">{calculateTotalBuy().toLocaleString('vi-VN')} VNĐ</p>
+            <p className="text-3xl font-black text-blue-700">{calculateTotalBuy().toLocaleString('vi-VN')} đ</p>
          </div>
       </div>
 

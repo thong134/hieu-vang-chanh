@@ -114,7 +114,7 @@ export default function AdminDashboard() {
                            {t.type === 'sell' && t.customerName ? t.customerName : '---'}
                          </td>
                          <td className="px-6 py-4 text-sm font-medium text-right text-gray-900">
-                           {t.type === 'sell' && t.totalPrice ? `${t.totalPrice} VNĐ` : '---'}
+                           {t.type === 'sell' && t.totalPrice ? `${t.totalPrice} đ` : '---'}
                          </td>
                        </tr>
                      ))
