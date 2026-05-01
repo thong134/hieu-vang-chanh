@@ -266,6 +266,10 @@ export default function ProductDetailPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-1">Nhà Sản Xuất</label>
               <input disabled={!isEditing} name="manufacturer" value={formData.manufacturer || ''} onChange={handleChange} type="text" className={`w-full p-3 rounded-xl border ${isEditing ? 'bg-gray-50 border-gray-200' : 'bg-transparent border-transparent px-0'}`} />
             </div>
+            <div className="col-span-2 md:col-span-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Địa Chỉ</label>
+              <input disabled={!isEditing} name="address" value={formData.address || ''} onChange={handleChange} type="text" className={`w-full p-3 rounded-xl border ${isEditing ? 'bg-gray-50 border-gray-200' : 'bg-transparent border-transparent px-0'}`} />
+            </div>
           </div>
 
           {isEditing && (

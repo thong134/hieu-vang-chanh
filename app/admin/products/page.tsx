@@ -5,12 +5,21 @@ import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Link from 'next/link';
 import { Plus, Search, Filter, Image as ImageIcon } from 'lucide-react';
+import Pagination from '@/app/components/Pagination';
+
+const ITEMS_PER_PAGE = 20;
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'available', 'sold'
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -38,6 +47,12 @@ export default function ProductsPage() {
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="space-y-6">
@@ -92,7 +107,7 @@ export default function ProductsPage() {
                 <th className="px-6 py-4 font-semibold">HLV</th>
                 <th className="px-6 py-4 font-semibold">KLV (Chỉ)</th>
                 <th className="px-6 py-4 font-semibold">Công</th>
-                <th className="px-6 py-4 font-semibold">Trạng Thái</th>
+                <th className="px-6 py-4 font-semibold whitespace-nowrap">Trạng Thái</th>
                 <th className="px-6 py-4 font-semibold text-right">Thao tác</th>
               </tr>
             </thead>
@@ -111,7 +126,7 @@ export default function ProductsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((p) => {
+                paginatedProducts.map((p) => {
                   let formattedLabor = '---';
                   const laborNum = Number(String(p.laborCost).replace(/,/g, ''));
                   if (!isNaN(laborNum) && laborNum > 0) {
@@ -125,16 +140,16 @@ export default function ProductsPage() {
                         {p.name || '---'}
                       </td>
                       <td className="px-6 py-4 text-gray-700 font-semibold text-red-600">{p.hlv || '---'}</td>
-                      <td className="px-6 py-4 text-gray-700 font-medium">{p.klv || '---'} chỉ</td>
+                      <td className="px-6 py-4 text-gray-700 font-medium">{p.klv || '---'}</td>
                       <td className="px-6 py-4 text-gray-700 font-medium text-blue-600">{p.laborCost ? formattedLabor : '---'}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {p.status === 'sold' ? (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                             Đã bán
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Kho
+                            Tồn kho
                           </span>
                         )}
                       </td>
@@ -154,6 +169,14 @@ export default function ProductsPage() {
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+        />
+      )}
     </div>
   );
 }

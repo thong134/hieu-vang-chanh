@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { NumericFormat } from 'react-number-format';
 
 type GoldRow = {
   id: number;
@@ -181,13 +182,15 @@ export default function GoldTable({ isFullscreen, onToggleFullscreen }: Props) {
                   onClick={() => handleCellClick(row, 'buy')}
                 >
                   {editingCell?.id === row.id && editingCell.field === 'buy' ? (
-                    <input
+                    <NumericFormat
                       autoFocus
-                      inputMode="decimal"
-                      pattern="[0-9]*"
-                      type="text"
-                      value={editValue}
-                      onChange={handleInputChange}
+                      value={editValue.replace(/\./g, '')}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      allowNegative={false}
+                      onValueChange={(values) => {
+                        setEditValue(values.formattedValue);
+                      }}
                       onKeyDown={handleKeyDown}
                       onBlur={handleConfirm}
                       className="absolute inset-0 w-full h-full text-center text-4xl md:text-6xl font-bold bg-white border-2 border-blue-500 outline-none text-red-600"
@@ -203,13 +206,15 @@ export default function GoldTable({ isFullscreen, onToggleFullscreen }: Props) {
                   onClick={() => handleCellClick(row, 'sell')}
                 >
                   {editingCell?.id === row.id && editingCell.field === 'sell' ? (
-                    <input
+                    <NumericFormat
                       autoFocus
-                      inputMode="decimal"
-                      pattern="[0-9]*"
-                      type="text"
-                      value={editValue}
-                      onChange={handleInputChange}
+                      value={editValue.replace(/\./g, '')}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      allowNegative={false}
+                      onValueChange={(values) => {
+                        setEditValue(values.formattedValue);
+                      }}
                       onKeyDown={handleKeyDown}
                       onBlur={handleConfirm}
                       className="absolute inset-0 w-full h-full text-center text-4xl md:text-6xl font-bold bg-white border-2 border-red-500 outline-none text-red-600"

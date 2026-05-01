@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { History, Filter, Search, Calendar, Clock } from 'lucide-react';
+import Pagination from '@/app/components/Pagination';
+
+const ITEMS_PER_PAGE = 20;
 
 export default function TransactionsHistoryPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -12,6 +15,12 @@ export default function TransactionsHistoryPage() {
   const [filterType, setFilterType] = useState('all'); 
   const [dateFilter, setDateFilter] = useState('today'); // all, today, week, month
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType, dateFilter, searchTerm]);
 
   // Lấy 500 giao dịch gần nhất
   useEffect(() => {
@@ -65,6 +74,12 @@ export default function TransactionsHistoryPage() {
 
     return matchSearch && matchType && matchDate;
   });
+
+  const totalPages = Math.ceil(filteredTrans.length / ITEMS_PER_PAGE);
+  const paginatedTrans = filteredTrans.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const getTypeLabel = (type: string) => {
     switch(type) {
@@ -183,7 +198,7 @@ export default function TransactionsHistoryPage() {
                   </td>
                 </tr>
               ) : (
-                filteredTrans.map((t) => (
+                paginatedTrans.map((t) => (
                   <tr key={t.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-800">
                       <div className="flex items-center gap-2">
@@ -221,6 +236,14 @@ export default function TransactionsHistoryPage() {
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+        />
+      )}
     </div>
   );
 }
