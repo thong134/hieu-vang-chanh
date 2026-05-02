@@ -10,23 +10,35 @@ export default function AdminDashboard() {
   const [recentTrans, setRecentTrans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Gold age measurement states
-  const [dryWeight, setDryWeight] = useState<string>('');
-  const [wetWeight, setWetWeight] = useState<string>('');
-  const [goldAge, setGoldAge] = useState<number | null>(null);
-  const [goldAge18k, setGoldAge18k] = useState<number | null>(null);
+  // Gold age measurement states 24K
+  const [dryWeight24, setDryWeight24] = useState<string>('');
+  const [wetWeight24, setWetWeight24] = useState<string>('');
+  const [goldAge24, setGoldAge24] = useState<number | null>(null);
 
-  const calculateGoldAge = () => {
-    const dry = parseFloat(dryWeight);
-    const wet = parseFloat(wetWeight);
+  // Gold age measurement states 18K
+  const [dryWeight18, setDryWeight18] = useState<string>('');
+  const [wetWeight18, setWetWeight18] = useState<string>('');
+  const [goldAge18, setGoldAge18] = useState<number | null>(null);
+
+  const calculateGoldAge24 = () => {
+    const dry = parseFloat(dryWeight24);
+    const wet = parseFloat(wetWeight24);
     if (dry > 0 && wet > 0) {
-      const age24 = (23.0284 * wet / dry) - 20.8390;
-      const age18 = (17.0814 * wet / dry) - 15.1968;
-      setGoldAge(age24);
-      setGoldAge18k(age18);
+      const age = (23.0284 * wet / dry) - 20.8390;
+      setGoldAge24(age);
     } else {
-      setGoldAge(null);
-      setGoldAge18k(null);
+      setGoldAge24(null);
+    }
+  };
+
+  const calculateGoldAge18 = () => {
+    const dry = parseFloat(dryWeight18);
+    const wet = parseFloat(wetWeight18);
+    if (dry > 0 && wet > 0) {
+      const age = (17.0814 * wet / dry) - 15.1968;
+      setGoldAge18(age);
+    } else {
+      setGoldAge18(null);
     }
   };
 
@@ -144,66 +156,112 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Gold Age Measurement Tool */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mt-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center">
-                <Calculator className="w-6 h-6" />
+          {/* Gold Age Measurement Tools */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+            {/* 24K Tool */}
+            <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+                  <Calculator className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Đo Tuổi Vàng 24K</h2>
+                  <p className="text-gray-500 text-sm mt-1">Hệ số 24K: 23.0284 và 20.8390</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Đo Tuổi Vàng (24K & 18K)</h2>
-                <p className="text-gray-500 text-sm mt-1">Tính tuổi vàng dựa trên tỷ trọng (cân khô / cân ướt).</p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Số cân khô (g)</label>
-                <input 
-                  type="number" 
-                  value={dryWeight} 
-                  onChange={(e) => setDryWeight(e.target.value)} 
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-200 outline-none transition-colors" 
-                  placeholder="Nhập số cân khô..." 
-                />
+              <div className="grid grid-cols-2 gap-4 items-end mb-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Cân khô (g)</label>
+                  <input 
+                    type="number" 
+                    value={dryWeight24} 
+                    onChange={(e) => setDryWeight24(e.target.value)} 
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-200 outline-none transition-colors" 
+                    placeholder="VD: 12.5" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Cân ướt (g)</label>
+                  <input 
+                    type="number" 
+                    value={wetWeight24} 
+                    onChange={(e) => setWetWeight24(e.target.value)} 
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-200 outline-none transition-colors" 
+                    placeholder="VD: 11.2" 
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Số cân ướt (g)</label>
-                <input 
-                  type="number" 
-                  value={wetWeight} 
-                  onChange={(e) => setWetWeight(e.target.value)} 
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-200 outline-none transition-colors" 
-                  placeholder="Nhập số cân ướt..." 
-                />
-              </div>
-            </div>
-            
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <button 
-                onClick={calculateGoldAge}
-                className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-sm"
-              >
-                Xác Nhận Đo
-              </button>
               
-              <div className="flex-1 flex flex-col sm:flex-row items-center sm:justify-end gap-4 md:gap-8 mt-4 sm:mt-0">
-                <div className="text-center sm:text-right">
-                  <span className="text-gray-500 text-sm block mb-1">Kết quả 18K:</span>
-                  {goldAge18k !== null ? (
-                    <span className="text-xl md:text-2xl font-black text-yellow-600">
-                      {goldAge18k.toFixed(4)} <span className="text-base text-yellow-700/80">({(goldAge18k * 100).toFixed(2)}%)</span>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <button 
+                  onClick={calculateGoldAge24}
+                  className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-sm whitespace-nowrap"
+                >
+                  Xác Nhận Đo
+                </button>
+                
+                <div className="text-center sm:text-right flex-1">
+                  <span className="text-gray-500 text-xs block mb-1 uppercase tracking-wider font-semibold">Kết quả 24K:</span>
+                  {goldAge24 !== null ? (
+                    <span className="text-xl md:text-2xl font-black text-red-600">
+                      {goldAge24.toFixed(4)} <span className="text-base text-red-700/80">({(goldAge24 * 100).toFixed(2)}%)</span>
                     </span>
                   ) : (
                     <span className="text-xl font-medium text-gray-400">---</span>
                   )}
                 </div>
-                <div className="hidden sm:block w-px h-10 bg-gray-200"></div>
-                <div className="text-center sm:text-right">
-                  <span className="text-gray-500 text-sm block mb-1">Kết quả 24K:</span>
-                  {goldAge !== null ? (
-                    <span className="text-xl md:text-2xl font-black text-red-600">
-                      {goldAge.toFixed(4)} <span className="text-base text-red-700/80">({(goldAge * 100).toFixed(2)}%)</span>
+              </div>
+            </div>
+
+            {/* 18K Tool */}
+            <div className="bg-white rounded-2xl shadow-sm border border-yellow-100 p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center">
+                  <Calculator className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Đo Tuổi Vàng 18K</h2>
+                  <p className="text-gray-500 text-sm mt-1">Hệ số 18K: 17.0814 và 15.1968</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 items-end mb-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Cân khô (g)</label>
+                  <input 
+                    type="number" 
+                    value={dryWeight18} 
+                    onChange={(e) => setDryWeight18(e.target.value)} 
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-200 outline-none transition-colors" 
+                    placeholder="VD: 12.5" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Cân ướt (g)</label>
+                  <input 
+                    type="number" 
+                    value={wetWeight18} 
+                    onChange={(e) => setWetWeight18(e.target.value)} 
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-200 outline-none transition-colors" 
+                    placeholder="VD: 11.2" 
+                  />
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <button 
+                  onClick={calculateGoldAge18}
+                  className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-sm whitespace-nowrap"
+                >
+                  Xác Nhận Đo
+                </button>
+                
+                <div className="text-center sm:text-right flex-1">
+                  <span className="text-gray-500 text-xs block mb-1 uppercase tracking-wider font-semibold">Kết quả 18K:</span>
+                  {goldAge18 !== null ? (
+                    <span className="text-xl md:text-2xl font-black text-yellow-600">
+                      {goldAge18.toFixed(4)} <span className="text-base text-yellow-700/80">({(goldAge18 * 100).toFixed(2)}%)</span>
                     </span>
                   ) : (
                     <span className="text-xl font-medium text-gray-400">---</span>
