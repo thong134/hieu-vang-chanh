@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { History, Filter, Search, Calendar, Clock } from 'lucide-react';
+import { History, Filter, Search, Calendar, Clock, Eye, X } from 'lucide-react';
 import Pagination from '@/app/components/Pagination';
 
 const ITEMS_PER_PAGE = 20;
@@ -16,6 +16,7 @@ export default function TransactionsHistoryPage() {
   const [dateFilter, setDateFilter] = useState('today'); // all, today, week, month
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -181,19 +182,20 @@ export default function TransactionsHistoryPage() {
                 <th className="px-6 py-4 font-semibold">Khách Hàng</th>
                 <th className="px-6 py-4 font-semibold">Mã / Chi Tiết</th>
                 <th className="px-6 py-4 font-semibold text-right">Thành Tiền (VNĐ)</th>
+                <th className="px-6 py-4 font-semibold text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-yellow-500 mb-2"></div>
                     <p>Đang tải dòng thời gian...</p>
                   </td>
                 </tr>
               ) : filteredTrans.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     Không tìm thấy giao dịch nào phù hợp với bộ lọc.
                   </td>
                 </tr>
@@ -229,6 +231,15 @@ export default function TransactionsHistoryPage() {
                          <span className="text-gray-400">---</span>
                       )}
                     </td>
+                    <td className="px-6 py-4 text-center">
+                      <button 
+                        onClick={() => setSelectedTransaction(t)}
+                        className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-yellow-600 transition-colors inline-block"
+                        title="Xem chi tiết"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -243,6 +254,113 @@ export default function TransactionsHistoryPage() {
           totalPages={totalPages} 
           onPageChange={setCurrentPage} 
         />
+      )}
+
+      {selectedTransaction && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <History className="w-6 h-6 text-yellow-600" />
+                Chi Tiết Giao Dịch
+              </h2>
+              <button onClick={() => setSelectedTransaction(null)} className="p-2 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="overflow-y-auto p-6 space-y-6">
+              {/* Info Header */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-500 block mb-1">Mã Giao Dịch</span>
+                  <span className="font-semibold break-all">{selectedTransaction.id}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-1">Loại Giao Dịch</span>
+                  {getTypeLabel(selectedTransaction.type)}
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-1">Thời Gian</span>
+                  <span className="font-semibold">
+                    {selectedTransaction.date?.toDate ? selectedTransaction.date.toDate().toLocaleString('vi-VN') : 'Không rõ'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-1">Khách Hàng</span>
+                  <span className="font-semibold text-yellow-700">{selectedTransaction.customerName || 'Khách Lẻ'}</span>
+                </div>
+              </div>
+
+              {/* Product Info */}
+              {selectedTransaction.productId && (
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                  <h4 className="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wide">Thông tin Sản phẩm</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                      <span className="text-gray-600">Mã sản phẩm:</span>
+                      <span className="font-semibold">{selectedTransaction.productId}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Pricing Info */}
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <h4 className="font-semibold text-blue-800 mb-3 text-sm uppercase tracking-wide">Chi tiết Thanh toán</h4>
+                <div className="space-y-3 text-sm">
+                  {selectedTransaction.type === 'sell' && (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Tổng cộng (Tạm tính):</span>
+                        <span className="font-semibold">{Number((selectedTransaction.totalPrice || 0) + (selectedTransaction.discount || 0)).toLocaleString('vi-VN')} đ</span>
+                      </div>
+                      <div className="flex justify-between text-red-600">
+                        <span>Giảm giá:</span>
+                        <span className="font-semibold">- {Number(selectedTransaction.discount || 0).toLocaleString('vi-VN')} đ</span>
+                      </div>
+                      <div className="border-t border-blue-200 pt-2 flex justify-between items-center">
+                        <span className="font-bold text-gray-800 text-base">Thực thu:</span>
+                        <span className="text-xl font-black text-blue-700">{Number(selectedTransaction.totalPrice || 0).toLocaleString('vi-VN')} đ</span>
+                      </div>
+                    </>
+                  )}
+                  {selectedTransaction.type !== 'sell' && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-gray-800 text-base">Thành tiền:</span>
+                      <span className="text-xl font-black text-blue-700">{Number(selectedTransaction.totalPrice || 0).toLocaleString('vi-VN')} đ</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between pt-2 border-t border-blue-200/50 mt-2">
+                    <span className="text-gray-600">Phương thức:</span>
+                    <span className="font-semibold uppercase">{selectedTransaction.paymentMethod === 'bank' ? 'Chuyển Khoản' : 'Tiền Mặt'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes & Attachment */}
+              {(selectedTransaction.notes || selectedTransaction.attachmentUrl) && (
+                <div className="space-y-4">
+                  {selectedTransaction.notes && (
+                    <div>
+                      <span className="text-sm font-semibold text-gray-700 block mb-1">Ghi chú:</span>
+                      <p className="p-3 bg-yellow-50 rounded-xl text-yellow-800 text-sm">{selectedTransaction.notes}</p>
+                    </div>
+                  )}
+                  {selectedTransaction.attachmentUrl && (
+                    <div>
+                      <span className="text-sm font-semibold text-gray-700 block mb-2">Ảnh đính kèm (Hóa đơn / CCCD):</span>
+                      <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center p-2">
+                        <img src={selectedTransaction.attachmentUrl} alt="Đính kèm" className="max-h-64 object-contain rounded-lg" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

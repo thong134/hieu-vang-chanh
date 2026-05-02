@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc, setDoc, serverTimestamp, onSnapshot } from 'fir
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, db, storage } from '@/lib/firebase';
 import { ScanBarcode, AlertCircle, ShoppingCart, CheckCircle2, Image as ImageIcon, X, Calculator } from 'lucide-react';
+import { NumericFormat } from 'react-number-format';
 
 export default function SellPage() {
   const router = useRouter();
@@ -109,8 +110,13 @@ export default function SellPage() {
           
           // Auto calculate
           const calc = calculateSuggestedPrice(prodData, dailyPrices);
-          setTotalPrice(calc.suggestedTotal);
-          setDiscount(0);
+          const rawTotal = calc.suggestedTotal;
+          // Làm tròn xuống hàng chục nghìn (VD: 17234300 -> 17230000)
+          const roundedTotal = Math.floor(rawTotal / 10000) * 10000;
+          const autoDiscount = rawTotal - roundedTotal;
+
+          setTotalPrice(rawTotal);
+          setDiscount(autoDiscount);
           setGoldPriceAtTime(calc.textDesc);
         }
       } else {
@@ -326,12 +332,34 @@ export default function SellPage() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Tính Tự Động (KLV * Giá + Công)</label>
-                  <input required value={totalPrice} onChange={e => setTotalPrice(Number(e.target.value))} type="number" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-200 outline-none font-semibold text-gray-900" />
+                  <NumericFormat 
+                    required 
+                    value={totalPrice} 
+                    onValueChange={(values) => setTotalPrice(values.floatValue || 0)} 
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-200 outline-none font-semibold text-gray-900" 
+                    allowLeadingZeros={false}
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-red-600 mb-1">Giảm Giá (Trừ bớt đi)</label>
-                  <input value={discount} onChange={e => setDiscount(Number(e.target.value) || 0)} type="number" className="w-full p-3 bg-red-50 border border-red-200 rounded-xl focus:ring-2 focus:ring-red-200 outline-none font-bold text-red-700" placeholder="VD: 50000" />
+                  <div className="flex justify-between items-end mb-1">
+                    <label className="block text-sm font-bold text-red-600">Giảm Giá (Trừ bớt đi)</label>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => setDiscount(d => d + 10000)} className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 font-bold transition-colors">+10k</button>
+                      <button type="button" onClick={() => setDiscount(d => d + 20000)} className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 font-bold transition-colors">+20k</button>
+                    </div>
+                  </div>
+                  <NumericFormat 
+                    value={discount} 
+                    onValueChange={(values) => setDiscount(values.floatValue || 0)} 
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    className="w-full p-3 bg-red-50 border border-red-200 rounded-xl focus:ring-2 focus:ring-red-200 outline-none font-bold text-red-700" 
+                    placeholder="VD: 50.000" 
+                    allowLeadingZeros={false}
+                  />
                 </div>
 
                 <div className="md:col-span-2 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl flex items-center justify-between">
