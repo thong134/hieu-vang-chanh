@@ -90,7 +90,7 @@ export default function AdminLayout({
           <div className="h-16 flex items-center px-6 border-b border-gray-200">
             <Link href="/" className="flex items-center gap-2 text-yellow-600 hover:text-yellow-700 transition-colors">
               <Store className="w-6 h-6" />
-              <span className="text-xl font-bold uppercase tracking-wide">Hiệu Vàng</span>
+              <span className="text-xl font-bold uppercase tracking-wide">Giá Vàng</span>
             </Link>
             <button 
               className="ml-auto lg:hidden text-gray-500 hover:text-gray-700"
