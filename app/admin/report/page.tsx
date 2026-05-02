@@ -56,21 +56,20 @@ export default function ReportPage() {
 
           // Determine Item Type
           let typeKey = 'khac';
+          
+          // Clean punctuation and pad with spaces for exact word matching
+          // This prevents substring bugs (e.g. 'bộng' matching 'bộ')
+          const paddedName = ' ' + nameLower.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ') + ' ';
+
           for (const type of ITEM_TYPES) {
-            // Because 'vòng' could match 'bộ vòng', we handle exact logic or just first match
-            // To be precise 'bộ vòng' should be ordered before 'vòng', which we didn't, but let's do a simple check:
-            if (type.keywords.some(kw => nameLower.includes(kw))) {
-              // Special fix if it matches 'bộ' or 'ximen'
-              if ((nameLower.includes('bộ') || nameLower.includes('ximen')) && type.key !== 'bo') {
-                  typeKey = 'bo';
-              } else {
-                  typeKey = type.key;
-              }
+            if (type.keywords.some(kw => paddedName.includes(` ${kw} `))) {
+              typeKey = type.key;
               break;
             }
           }
-          // Fix ordering priority for 'Bộ vòng' over 'Vòng'
-          if (nameLower.includes('bộ') || nameLower.includes('ximen')) {
+          
+          // Fix ordering priority for 'Bộ vòng' over 'Vòng' (since 'Vòng' appears before 'Bộ' in the list)
+          if (paddedName.includes(' bộ ') || paddedName.includes(' ximen ') || paddedName.includes(' bộ vòng ')) {
             typeKey = 'bo';
           }
 
