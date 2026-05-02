@@ -14,15 +14,19 @@ export default function AdminDashboard() {
   const [dryWeight, setDryWeight] = useState<string>('');
   const [wetWeight, setWetWeight] = useState<string>('');
   const [goldAge, setGoldAge] = useState<number | null>(null);
+  const [goldAge18k, setGoldAge18k] = useState<number | null>(null);
 
   const calculateGoldAge = () => {
     const dry = parseFloat(dryWeight);
     const wet = parseFloat(wetWeight);
     if (dry > 0 && wet > 0) {
-      const age = (23.0284 * wet / dry) - 20.8390;
-      setGoldAge(age);
+      const age24 = (23.0284 * wet / dry) - 20.8390;
+      const age18 = (17.0814 * wet / dry) - 15.1968;
+      setGoldAge(age24);
+      setGoldAge18k(age18);
     } else {
       setGoldAge(null);
+      setGoldAge18k(null);
     }
   };
 
@@ -147,7 +151,7 @@ export default function AdminDashboard() {
                 <Calculator className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Đo Tuổi Vàng 24k</h2>
+                <h2 className="text-xl font-bold text-gray-900">Đo Tuổi Vàng (24K & 18K)</h2>
                 <p className="text-gray-500 text-sm mt-1">Tính tuổi vàng dựa trên tỷ trọng (cân khô / cân ướt).</p>
               </div>
             </div>
@@ -183,13 +187,28 @@ export default function AdminDashboard() {
                 Xác Nhận Đo
               </button>
               
-              <div className="text-right flex-1">
-                <span className="text-gray-500 text-sm block mb-1">Kết quả Tuổi Vàng:</span>
-                {goldAge !== null ? (
-                  <span className="text-2xl md:text-3xl font-black text-red-600">{goldAge.toFixed(4)}%</span>
-                ) : (
-                  <span className="text-xl font-medium text-gray-400">---</span>
-                )}
+              <div className="flex-1 flex flex-col sm:flex-row items-center sm:justify-end gap-4 md:gap-8 mt-4 sm:mt-0">
+                <div className="text-center sm:text-right">
+                  <span className="text-gray-500 text-sm block mb-1">Kết quả 18K:</span>
+                  {goldAge18k !== null ? (
+                    <span className="text-xl md:text-2xl font-black text-yellow-600">
+                      {goldAge18k.toFixed(4)} <span className="text-base text-yellow-700/80">({(goldAge18k * 100).toFixed(2)}%)</span>
+                    </span>
+                  ) : (
+                    <span className="text-xl font-medium text-gray-400">---</span>
+                  )}
+                </div>
+                <div className="hidden sm:block w-px h-10 bg-gray-200"></div>
+                <div className="text-center sm:text-right">
+                  <span className="text-gray-500 text-sm block mb-1">Kết quả 24K:</span>
+                  {goldAge !== null ? (
+                    <span className="text-xl md:text-2xl font-black text-red-600">
+                      {goldAge.toFixed(4)} <span className="text-base text-red-700/80">({(goldAge * 100).toFixed(2)}%)</span>
+                    </span>
+                  ) : (
+                    <span className="text-xl font-medium text-gray-400">---</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
