@@ -14,12 +14,13 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'available', 'sold'
+  const [hlvFilter, setHlvFilter] = useState('all'); // 'all', '61', '98'
   const [currentPage, setCurrentPage] = useState(1);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, hlvFilter]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -45,7 +46,11 @@ export default function ProductsPage() {
     const matchesSearch = p.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    const hlvStr = String(p.hlv || '').trim();
+    const matchesHlv = hlvFilter === 'all' || hlvStr === hlvFilter;
+
+    return matchesSearch && matchesStatus && matchesHlv;
   });
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -82,8 +87,17 @@ export default function ProductsPage() {
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 outline-none transition-all"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-gray-400" />
+        <div className="flex flex-wrap items-center gap-2">
+          <Filter className="w-5 h-5 text-gray-400 hidden sm:block" />
+          <select 
+            value={hlvFilter}
+            onChange={(e) => setHlvFilter(e.target.value)}
+            className="py-2.5 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 outline-none transition-all font-medium text-gray-700"
+          >
+            <option value="all">Tất cả HLV</option>
+            <option value="61">Vàng Tây (61)</option>
+            <option value="98">Vàng Y (98)</option>
+          </select>
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}

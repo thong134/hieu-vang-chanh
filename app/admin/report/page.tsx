@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, X } from 'lucide-react';
 
 const ITEM_TYPES = [
   { key: 'nhan', label: 'Nhẫn', keywords: ['nhẫn', 'nhan'] },
@@ -17,8 +17,8 @@ const ITEM_TYPES = [
 ];
 
 type CategoryStats = {
-  tonKho: { count: number, klv: number },
-  daBan: { count: number, klv: number }
+  tonKho: { count: number, klv: number, items: any[] },
+  daBan: { count: number, klv: number, items: any[] }
 };
 
 type ReportData = {
@@ -28,9 +28,9 @@ type ReportData = {
 function initReportData(): ReportData {
   const data: ReportData = {};
   ITEM_TYPES.forEach(t => {
-    data[t.key] = { tonKho: { count: 0, klv: 0 }, daBan: { count: 0, klv: 0 } };
+    data[t.key] = { tonKho: { count: 0, klv: 0, items: [] }, daBan: { count: 0, klv: 0, items: [] } };
   });
-  data['khac'] = { tonKho: { count: 0, klv: 0 }, daBan: { count: 0, klv: 0 } };
+  data['khac'] = { tonKho: { count: 0, klv: 0, items: [] }, daBan: { count: 0, klv: 0, items: [] } };
   return data;
 }
 
@@ -38,6 +38,7 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(true);
   const [reportY, setReportY] = useState<ReportData>(initReportData());
   const [reportTay, setReportTay] = useState<ReportData>(initReportData());
+  const [selectedList, setSelectedList] = useState<{ title: string, items: any[] } | null>(null);
 
   useEffect(() => {
     const generateReports = async () => {
@@ -74,20 +75,22 @@ export default function ReportPage() {
           }
 
           // Aggregate
-          const updateStats = (dataObj: ReportData, key: string, sold: boolean, klv: number) => {
+          const updateStats = (dataObj: ReportData, key: string, sold: boolean, klv: number, product: any) => {
              if (sold) {
                 dataObj[key].daBan.count += 1;
                 dataObj[key].daBan.klv += klv;
+                dataObj[key].daBan.items.push(product);
              } else {
                 dataObj[key].tonKho.count += 1;
                 dataObj[key].tonKho.klv += klv;
+                dataObj[key].tonKho.items.push(product);
              }
           };
 
           if (hlvStr === '98') {
-             updateStats(yData, typeKey, isSold, klvNum);
+             updateStats(yData, typeKey, isSold, klvNum, { id: doc.id, ...p });
           } else if (hlvStr === '61') {
-             updateStats(tayData, typeKey, isSold, klvNum);
+             updateStats(tayData, typeKey, isSold, klvNum, { id: doc.id, ...p });
           }
         });
 
@@ -102,6 +105,13 @@ export default function ReportPage() {
 
     generateReports();
   }, []);
+
+  const handleRowClick = (label: string, hlvLabel: string, stat: CategoryStats) => {
+    const allItems = [...stat.tonKho.items, ...stat.daBan.items];
+    if (allItems.length > 0) {
+      setSelectedList({ title: `Chi tiết: ${hlvLabel} - ${label}`, items: allItems });
+    }
+  };
 
   const renderTable = (data: ReportData, title: string, colorClass: string) => {
     let totalTonKhoCount = 0, totalTonKhoKlv = 0;
@@ -138,7 +148,7 @@ export default function ReportPage() {
                      totalDaBanKlv += stat.daBan.klv;
 
                      return (
-                        <tr key={item.key} className="hover:bg-gray-50/50">
+                        <tr key={item.key} className="hover:bg-gray-50/50 cursor-pointer transition-colors" onClick={() => handleRowClick(item.label, title, stat)}>
                            <td className="px-4 py-3 font-semibold text-gray-800">{item.label}</td>
                            <td className="px-4 py-3 text-center font-medium text-gray-900 border-l border-gray-100">{stat.tonKho.count || '-'}</td>
                            <td className="px-4 py-3 text-center text-red-600 font-semibold">{stat.tonKho.klv > 0 ? Number(stat.tonKho.klv.toFixed(3)) : '-'}</td>
@@ -186,6 +196,59 @@ export default function ReportPage() {
           </div>
           <div>
             {renderTable(reportTay, "VÀNG TÂY (HLV 61)", "text-orange-800 bg-orange-100/50")}
+          </div>
+        </div>
+      )}
+
+      {/* Modal View */}
+      {selectedList && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-xl font-bold text-gray-900">{selectedList.title} <span className="text-gray-500 font-medium text-base">({selectedList.items.length} sản phẩm)</span></h2>
+              <button onClick={() => setSelectedList(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-6 flex-1">
+              <div className="border border-gray-200 rounded-xl overflow-hidden">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 font-semibold text-gray-600">Mã Vạch</th>
+                      <th className="px-4 py-3 font-semibold text-gray-600">Tên Sản Phẩm</th>
+                      <th className="px-4 py-3 font-semibold text-gray-600">KLV</th>
+                      <th className="px-4 py-3 font-semibold text-gray-600">Công</th>
+                      <th className="px-4 py-3 font-semibold text-gray-600">Trạng Thái</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {selectedList.items.map((p) => {
+                      let formattedLabor = '---';
+                      const laborNum = Number(String(p.laborCost).replace(/,/g, ''));
+                      if (!isNaN(laborNum) && laborNum > 0) {
+                          formattedLabor = (laborNum * 1000).toLocaleString('vi-VN') + 'đ';
+                      }
+                      return (
+                        <tr key={p.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-medium text-gray-900">{p.id}</td>
+                          <td className="px-4 py-3 text-gray-700 font-medium">{p.name || '---'}</td>
+                          <td className="px-4 py-3 text-gray-700 font-medium">{p.klv || '---'}</td>
+                          <td className="px-4 py-3 text-gray-700 font-medium text-blue-600">{p.laborCost ? formattedLabor : '---'}</td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            {p.status === 'sold' ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Đã bán</span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Tồn kho</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       )}
