@@ -3,12 +3,28 @@
 import { useEffect, useState } from 'react';
 import { collection, query, orderBy, limit, getDocs, where, getCountFromServer } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Package, ShoppingBag, History } from 'lucide-react';
+import { Package, ShoppingBag, History, Calculator } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ available: 0, sold: 0 });
   const [recentTrans, setRecentTrans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Gold age measurement states
+  const [dryWeight, setDryWeight] = useState<string>('');
+  const [wetWeight, setWetWeight] = useState<string>('');
+  const [goldAge, setGoldAge] = useState<number | null>(null);
+
+  const calculateGoldAge = () => {
+    const dry = parseFloat(dryWeight);
+    const wet = parseFloat(wetWeight);
+    if (dry > 0 && wet > 0) {
+      const age = (23.0284 * wet / dry) - 20.8390;
+      setGoldAge(age);
+    } else {
+      setGoldAge(null);
+    }
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -121,6 +137,60 @@ export default function AdminDashboard() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Gold Age Measurement Tool */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mt-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center">
+                <Calculator className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Đo Tuổi Vàng 24k</h2>
+                <p className="text-gray-500 text-sm mt-1">Tính tuổi vàng dựa trên tỷ trọng (cân khô / cân ướt).</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Số cân khô (g)</label>
+                <input 
+                  type="number" 
+                  value={dryWeight} 
+                  onChange={(e) => setDryWeight(e.target.value)} 
+                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-200 outline-none transition-colors" 
+                  placeholder="Nhập số cân khô..." 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Số cân ướt (g)</label>
+                <input 
+                  type="number" 
+                  value={wetWeight} 
+                  onChange={(e) => setWetWeight(e.target.value)} 
+                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-200 outline-none transition-colors" 
+                  placeholder="Nhập số cân ướt..." 
+                />
+              </div>
+            </div>
+            
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <button 
+                onClick={calculateGoldAge}
+                className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-sm"
+              >
+                Xác Nhận Đo
+              </button>
+              
+              <div className="text-right flex-1">
+                <span className="text-gray-500 text-sm block mb-1">Kết quả Tuổi Vàng:</span>
+                {goldAge !== null ? (
+                  <span className="text-2xl md:text-3xl font-black text-red-600">{goldAge.toFixed(4)}%</span>
+                ) : (
+                  <span className="text-xl font-medium text-gray-400">---</span>
+                )}
+              </div>
             </div>
           </div>
         </>
